@@ -2,9 +2,8 @@
 import { ref, onMounted } from 'vue';
 
 const emit = defineEmits(['edit-product', 'delete-product']);
-
 const products = ref([]);
-const authToken = '8746734bd796f78ff7b84b83b1eec72bc3031793'; // <<<--- NÃO SE ESQUEÇA DO SEU TOKEN
+const authToken = 'SEU_TOKEN_AQUI'; // <<<--- NÃO SE ESQUEÇA DE COLOCAR SEU TOKEN
 
 const fetchProducts = async () => {
   try {
@@ -20,9 +19,7 @@ const fetchProducts = async () => {
 
 onMounted(fetchProducts);
 
-defineExpose({
-  fetchProducts
-});
+defineExpose({ fetchProducts });
 </script>
 
 <template>

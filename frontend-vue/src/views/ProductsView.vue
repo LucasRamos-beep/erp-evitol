@@ -1,81 +1,53 @@
 <script setup>
 import { ref } from 'vue';
+import ProductList from '../components/ProductList.vue';
+import ProductForm from '../components/ProductForm.vue';
 
-const username = ref('');
-const password = ref('');
-const errorMessage = ref(null);
+const authToken = 'SEU_TOKEN_AQUI'; // <<<--- NÃO SE ESQUEÇA DE COLOCAR SEU TOKEN
 
-const handleLogin = async () => {
-  errorMessage.value = null; // Limpa mensagens de erro antigas
-  const loginData = {
-    username: username.value,
-    password: password.value,
-  };
+const productListRef = ref(null);
+const productFormRef = ref(null);
 
-  try {
-    const response = await fetch('http://127.0.0.1:8000/api/auth/login/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(loginData)
-    });
+const handleDataChanged = () => {
+  if (productListRef.value) {
+    productListRef.value.fetchProducts();
+  }
+};
 
-    const data = await response.json();
+const handleProductEdit = (product) => {
+  if (productFormRef.value) {
+    productFormRef.value.loadProductForEdit(product);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
 
-    if (!response.ok) {
-      // Pega a mensagem de erro do backend, se houver
-      throw new Error(data.non_field_errors || 'Erro ao tentar fazer login.');
+const handleProductDelete = async (productId) => {
+  if (confirm(`Tem certeza que deseja excluir o produto com ID ${productId}?`)) {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Token ${authToken}` }
+      });
+      if (!response.ok) throw new Error('Falha ao excluir o produto');
+      alert('Produto excluído com sucesso!');
+      handleDataChanged();
+    } catch (error) {
+      console.error(error);
+      alert('Não foi possível excluir o produto.');
     }
-
-    // Se o login for bem-sucedido, salva o token e recarrega a página
-    localStorage.setItem('authToken', data.key);
-    window.location.reload();
-
-  } catch (error) {
-    console.error('Erro de login:', error);
-    errorMessage.value = error.message;
   }
 };
 </script>
 
 <template>
-  <div class="login-container">
-    <div class="login-box">
-      <h2>Login do Sistema</h2>
-      <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label for="username">Usuário:</label>
-          <input type="text" v-model="username" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Senha:</label>
-          <input type="password" v-model="password" required>
-        </div>
-        <div v-if="errorMessage" class="error-message">
-          {{ errorMessage }}
-        </div>
-        <button type="submit">Entrar</button>
-      </form>
-    </div>
+  <div class="products-view">
+    <ProductForm ref="productFormRef" @product-saved="handleDataChanged" />
+    <hr>
+    <ProductList ref="productListRef" @edit-product="handleProductEdit" @delete-product="handleProductDelete" />
   </div>
 </template>
 
 <style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
-}
-.login-box {
-  padding: 40px;
-  background: white;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
-}
-.error-message {
-  color: #dc3545;
-  margin-bottom: 15px;
-}
+.products-view { display: flex; flex-direction: column; gap: 20px; }
+hr { border: 0; height: 1px; background: #ddd; }
 </style>
