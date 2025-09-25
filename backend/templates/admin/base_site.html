@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{# Este bloco é o local correto para adicionar CSS customizado ao admin #}
+{% block extrastyle %}{{ block.super }}
+<style>
+    #branding img {
+        height: 100px; 
+        width: auto;  /* Mantém a proporção da imagem */
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+
+{# Este bloco substitui o título de texto pela nossa imagem #}
+{% block branding %}
+<div id="branding">
+    <a href="{% url 'admin:index' %}">
+        {# Removemos a altura e o estilo daqui, pois agora são controlados pelo CSS acima #}
+        <img src="{% static 'img/logo.png' %}" alt="Logo EVITOL">
+    </a>
+</div>
+{% endblock %}
